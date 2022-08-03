@@ -1,0 +1,35 @@
+site_name: movinets_helper
+site_description: Functionalities to simplify working with Mobile Video Networks.
+
+theme:
+  name: "material"
+  palette: 
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-6
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-6
+        name: Switch to light mode
+
+repo_name: plaguss/movinets_helper
+repo_url: https://github.com/plaguss/movinets_helper
+edit_uri: ""
+
+plugins:
+  - search
+  - mkdocstrings
+
+nav:
+    - Intro: index.md
+    - Installation: installation.md
+    - API:
+        - utils: api/utils.md
+        - writer: api/writer.md
+        - reader: api/reader.md
+        - modelling: api/modelling.md
+        

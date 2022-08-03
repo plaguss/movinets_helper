@@ -1,5 +1,5 @@
 [build-system]
-requires = ["flit_core >=2,<4"]
+requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
 
 [tool.flit.metadata]
@@ -7,6 +7,14 @@ module = "movinets_helper"
 author = "Agustín Piqueres"
 author-email = "agustin.piqueres@gmail.com"
 home-page = "https://github.com/plaguss/movinets_helper"
+requires = [
+    "tensorflow==2.8.0",
+    "tensorflow-io>=0.26.0",
+    "tqdm>=4.62.3",
+    "pandas>=1.3.5",
+    "opencv-python>=4.5.5.62",
+    "opencv-python-headless>=4.6.0.66",
+]
 requires-python=">=3.8"
 license = "MIT"
 classifiers = [
@@ -20,6 +28,11 @@ description-file = "README.md"
 test = [
     "pytest==6.2.3",
     "pytest-cov==2.11.1"
+]
+doc = [
+    "mkdocs",
+    "mkdocs-material",
+    "mkdocstrings[python]"
 ]
 dev = [
     "isort",
