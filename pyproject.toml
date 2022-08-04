@@ -10,6 +10,7 @@ home-page = "https://github.com/plaguss/movinets_helper"
 requires = [
     "tensorflow==2.8.0",
     "tensorflow-io>=0.26.0",
+    "tf-models-official",
     "tqdm>=4.62.3",
     "pandas>=1.3.5",
     "opencv-python>=4.5.5.62",
@@ -38,7 +39,8 @@ dev = [
     "isort",
     "black",
     "mypy",
-    "nox"
+    "nox",
+    "flake8"
 ]
 
 [tool.flit.metadata.urls]
