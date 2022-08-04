@@ -3,39 +3,39 @@
 These are just a bunch of wrapper functions on the Movinet model.
 """
 
+from typing import *
 from dataclasses import dataclass
 
 import tensorflow as tf
 
-from official.vision.configs import video_classification
-from official.projects.movinet.configs import movinet as movinet_configs
 from official.projects.movinet.modeling import movinet
-from official.projects.movinet.modeling import movinet_layers
 from official.projects.movinet.modeling import movinet_model
 
 
 @dataclass
 class BaseConfig:
-    """Configuration for the data ingested to the model. """
+    """Configuration for the data ingested to the model."""
     num_frames: int = 10
     resolution: int = 172
     batch_size: int = 8
     channels: int = 3
+    epochs: int = 3
+    version: str = "base"
 
 
 @dataclass
 class ConfigMovinetA0Base(BaseConfig):
-    id: int = 0
+    model_id: int = 0
 
 
 @dataclass
 class ConfigMovinetA2Base(BaseConfig):
-    id: int = 1
+    model_id: int = 1
 
 
 @dataclass
 class ConfigMovinetA2Base(BaseConfig):
-    id: int = 2
+    model_id: int = 2
     resolution: int = 224
 
 
@@ -56,7 +56,7 @@ def build_classifier(
         backbone (movinet.Movinet): _description_
         num_classes (int): Number of classes for your given model.
         model_config (BaseConfig): Configuration of the model chosen.
-            Contains 
+            Contains
         freeze_backbone (int, optional):
             Whether to freeze all the layers but the last. Defaults to True.
         stream (bool, optional):
@@ -92,47 +92,88 @@ def build_classifier(
 
 
 def make_model(
-    num_classes: int, model_id: str = "a0", version: str = "base", freeze_backbone: bool = True
+    num_classes: int,
+    config: BaseConfig,
+    freeze_backbone: bool = True,
 ):
-    if version != "base":
+    if config.version != "base":
         raise ValueError(f"Movinet Stream model not implemented")
 
-    backbone = movinet.Movinet(model_id=model_id)
+    backbone = movinet.Movinet(model_id=config.model_id)
     # Initial number of classes 600 from Kinetics
     model = movinet_model.MovinetClassifier(backbone=backbone, num_classes=600)
     model.build([1, 1, 1, 1, 3])
 
     # TODO: REVIEW THE CHECKPOINT
-    checkpoint_dir = f"movinet_{model_id}_{version}"
+    checkpoint_dir = f"movinet_{config.model_id}_{config.version}"
     checkpoint_path = tf.train.latest_checkpoint(checkpoint_dir)
 
     checkpoint = tf.train.Checkpoint(model=model)
 
     status = checkpoint.restore(checkpoint_path)
 
-    model = build_classifier(backbone, num_classes, freeze_backbone=True)
+    model = build_classifier(backbone, num_classes, freeze_backbone=freeze_backbone)
     return model
 
 
-def default_hyperparams():
-    pass
+def default_hyperparams(total_train_steps: int):
+    """Gathers the hyperparameters used in the movinet tutorial to train
+    the models. 
+
+    Just call this if you aren't willing to investigate further.
+
+    FIXME:
+        - Explain how to use it
+        - Set examples
+    """
+    return {
+        "loss_function": loss_function(),
+        "metrics": metrics(),
+        "optimizer": optimizer(total_train_steps),
+        "callbacks": loss_function(),
+    }
 
 
-def default_loss_function():
-    pass
+def loss_function() -> tf.keras.losses.CategoricalCrossentropy:
+    return tf.keras.losses.CategoricalCrossentropy(
+        from_logits=True, label_smoothing=0.1
+    )
 
 
-def default_metrics():
-    pass
+def metrics() -> List[
+    tf.keras.metrics.TopKCategoricalAccuracy, tf.keras.metrics.TopKCategoricalAccuracy
+]:
+    return [
+        tf.keras.metrics.TopKCategoricalAccuracy(k=1, name="top_1", dtype=tf.float32),
+        tf.keras.metrics.TopKCategoricalAccuracy(k=5, name="top_5", dtype=tf.float32),
+    ]
 
 
-def default_learning_rate():
-    pass
+def learning_rate(total_train_steps: int):
+    initial_learning_rate = 0.01
+    return tf.keras.optimizers.schedules.CosineDecay(
+        initial_learning_rate,
+        decay_steps=total_train_steps,
+    )
 
 
-def default_optimizer():
-    pass
+def optimizer(total_train_steps: int):
+    lr = learning_rate(total_train_steps)
+    return tf.keras.optimizers.RMSprop(
+        lr, rho=0.9, momentum=0.9, epsilon=1.0, clipnorm=1.0
+    )
 
 
-def default_callbacks():
-    pass
+def callbacks(checkpoint_filepath: str) -> List[tf.keras.callbacks.Callback]:
+    model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+        filepath=checkpoint_filepath,
+        save_weights_only=True,
+        monitor='val_top_1',
+        mode='max',
+        save_best_only=True
+    )
+
+    return [
+        tf.keras.callbacks.TensorBoard(),
+        model_checkpoint_callback
+    ]
