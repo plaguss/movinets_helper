@@ -138,3 +138,32 @@ def split_train_test(
     train = dataset.sample(int(len(dataset) * train_size), random_state=seed)
     test = dataset.loc[set(dataset.index).difference(train.index), :]
     return train, test
+
+
+def get_number_of_steps(samples: int, batch_size: int, epochs: int = 1) -> Tuple[int, int]:
+    """Obtain the number of steps.
+
+    Computes the number of steps per epoch and the total number of steps
+    to be applied on the LearningScheduler (if used).
+
+    To be called both for train and validation/test.
+
+    Args:
+        samples (int): _description_
+        batch_size (int): _description_
+        epochs (int, optional):
+            Number of epochs. If bigger than 1, the second
+            returned value corresponds to the total number of
+            steps the network will do.
+            Defaults to 1.
+
+    Returns:
+        Tuple[int, int]: The first argument will either be the number of steps
+            per epoch or the number of validation steps when calling `fit` on
+            the model, and the second may be used to estimate the learning
+            rate scheduler (when number of epochs > 1 and computing steps
+            for the training samples).
+    """
+    steps = samples // batch_size
+    return steps, steps * epochs
+    
