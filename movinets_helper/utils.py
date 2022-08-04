@@ -81,3 +81,35 @@ def get_frame_count(path: Path) -> int:
         frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
     return frame_count
+
+
+def get_label_from_video_name(filename: Path) -> str:
+    """Extracts the label of the movement from the video filename.
+
+    Examples:
+
+        >>> path = PosixPath('.../chest-to-bar_6.mp4')
+        >>> get_label_from_video_name(path)
+        "chest-to-bar"
+    """
+    return filename.stem.split("_")[0]
+
+
+def get_labels(filenames: List[Path]) -> List[str]:
+    return [get_label_from_video_name(f) for f in filenames]
+
+
+def create_class_map(path: Union[str, Path]) -> Dict[str, int]:
+    """Given a path to a labels.txt file, creates a class map.
+
+    Helper function to obtain the classes for the labels.
+
+    Args:
+        path (str or Path): Path pointing to the labels.txt file.
+
+    Returns:
+        Dict[str, int]: Dict mapping from labels to classes.
+    """
+    if isinstance(path, str):
+        path = Path(path)
+    return {l: i for i, l in enumerate(path.read_text().split("\n"))}
