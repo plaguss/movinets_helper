@@ -8,7 +8,7 @@ author = "Agustín Piqueres"
 author-email = "agustin.piqueres@gmail.com"
 home-page = "https://github.com/plaguss/movinets_helper"
 requires = [
-    "tensorflow==2.8.0",
+    "tensorflow",
     "tensorflow-io>=0.26.0",
     "tf-models-official",
     "tqdm>=4.62.3",
