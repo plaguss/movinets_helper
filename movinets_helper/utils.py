@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import *
 
 import cv2
+import pandas as pd
 import tensorflow as tf
 import tensorflow_io as tfio
 
@@ -113,3 +114,26 @@ def create_class_map(path: Union[str, Path]) -> Dict[str, int]:
     if isinstance(path, str):
         path = Path(path)
     return {l: i for i, l in enumerate(path.read_text().split("\n"))}
+
+
+def split_train_test(
+    dataset: pd.DataFrame, train_size: float = 0.8, seed: int = 5678
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Simple function to split a dataset in train/test.
+
+    This functionality may be obtained from many other libraries,
+    its just here for personal convinience.
+
+    Args:
+        dataset (pd.DataFrame): 
+            DataFrame with 3 columns: labels, files and classes.
+        train_size (float): 
+            Percentage of the sample for training, range [0, 1].
+        seed (int, optional): _description_. Defaults to 5678.
+
+    Returns:
+        Tuple[pd.DataFrame, pd.DataFrame]: _description_
+    """
+    train = dataset.sample(int(len(dataset) * train_size), random_state=seed)
+    test = dataset.loc[set(dataset.index).difference(train.index), :]
+    return train, test
