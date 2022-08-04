@@ -16,10 +16,10 @@ and consists of four separate parts:
 
 3. API reference
 
-    3.1. [utils](utils.md)
+    3.1. [utils](api/utils.md)
 
-    3.2. [modelling](modelling.md)
+    3.2. [modelling](api/modelling.md)
 
-    3.3. [reader](reader.md)
+    3.3. [reader](api/reader.md)
 
-    3.4. [writer](writer.md)
+    3.4. [writer](api/writer.md)

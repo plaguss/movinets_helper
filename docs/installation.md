@@ -1,3 +1,1 @@
-This part contains the code documentation.
-
-::: movinets_helper.utils
+Explain how to install the package in this section
