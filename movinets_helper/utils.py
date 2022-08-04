@@ -23,7 +23,7 @@ def load_video_tf(path: str) -> tf.Tensor:
 
 
 def get_chunks(l: List[Union[str, Path]], n: int) -> Iterable[Union[str, Path]]:
-    """Yield successive n-sized chunks from l.
+    r"""Yield successive n-sized chunks from l.
 
     Used to create n sublists from a list l.
     copied
@@ -125,14 +125,15 @@ def split_train_test(
     its just here for personal convinience.
 
     Args:
-        dataset (pd.DataFrame): 
+        dataset (pd.DataFrame):
             DataFrame with 3 columns: labels, files and classes.
-        train_size (float): 
+        train_size (float):
             Percentage of the sample for training, range [0, 1].
-        seed (int, optional): _description_. Defaults to 5678.
+        seed (int, optional): Random seed to split the data.
+            Defaults to 5678.
 
     Returns:
-        Tuple[pd.DataFrame, pd.DataFrame]: _description_
+        Tuple[pd.DataFrame, pd.DataFrame]: tran and test datasets.
     """
     train = dataset.sample(int(len(dataset) * train_size), random_state=seed)
     test = dataset.loc[set(dataset.index).difference(train.index), :]

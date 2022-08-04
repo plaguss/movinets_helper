@@ -1,5 +1,4 @@
-"""
-"""
+"""Helper to write mp4 videos to TFRecordDataset. """
 
 from pathlib import Path
 from typing import *
@@ -111,7 +110,7 @@ def convert_mp4_to_tfrecord(
         >>> convert_mp4_to_tfrecord(test_dataset_df[["classes", "files"]], target_path_test)
 
     Note:
-        This data format isn't storage friendly, so it is gzip compressed.
+        This data format isn't storage friendly, even after compression.
     """
     if not Path(target_path).is_dir():
         print(f"{target_path} doesn't exist, create it first.")
@@ -134,8 +133,9 @@ def convert_mp4_to_tfrecord(
             tfrecord_filename, options=tf.io.TFRecordOptions(compression_type="GZIP")
         ) as file_writer:
             for label, file in batch:
-                video = load_video_tf(file)
-                if video.shape[0] == 0:
+                try:
+                    video = load_video_tf(file)
+                except tf.errors.InvalidArgumentError:
                     print(f"Video without length, passing")
                     continue
                 video = tf.image.resize(video, (resolution, resolution))
