@@ -1,6 +1,8 @@
 # movinets-helper
 
-Intro
+Package to help fine-tuning MoViNets.
+
+WORK IN PROGRESS.
 
 ### Development status
 
@@ -23,7 +25,7 @@ Explain here
 
 ### Documentation
 
-Read the documentation on [ReadTheDocs](https://movinets_helper.readthedocs.io/en/latest/).
+Insert link
 
 ### License
 
