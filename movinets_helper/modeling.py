@@ -25,17 +25,17 @@ class BaseConfig:
 
 @dataclass
 class ConfigMovinetA0Base(BaseConfig):
-    model_id: int = 0
+    model_id: int = "a0"
 
 
 @dataclass
 class ConfigMovinetA2Base(BaseConfig):
-    model_id: int = 1
+    model_id: int = "a0"
 
 
 @dataclass
 class ConfigMovinetA2Base(BaseConfig):
-    model_id: int = 2
+    model_id: int = "a2"
     resolution: int = 224
 
 
@@ -112,7 +112,7 @@ def make_model(
 
     status = checkpoint.restore(checkpoint_path)
 
-    model = build_classifier(backbone, num_classes, freeze_backbone=freeze_backbone)
+    model = build_classifier(backbone, num_classes, config, freeze_backbone=freeze_backbone)
     return model
 
 
