@@ -1,5 +1,6 @@
 site_name: movinets_helper
 site_description: Functionalities to simplify working with Mobile Video Networks.
+site_url: https://plaguss.github.io/movinets_helper
 
 theme:
   name: "material"

@@ -26,6 +26,7 @@ Explain here
 ### Documentation
 
 Insert link
+[Github Pages](https://plaguss.github.io/movinets_helper)
 
 ### License
 
