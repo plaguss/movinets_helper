@@ -149,8 +149,10 @@ def get_number_of_steps(samples: int, batch_size: int, epochs: int = 1) -> Tuple
     To be called both for train and validation/test.
 
     Args:
-        samples (int): _description_
-        batch_size (int): _description_
+        samples (int): Number of examples in the dataset.
+            If the data is splitted in train/test, each of them
+            should be treated independently.
+        batch_size (int): Number of videos per step.
         epochs (int, optional):
             Number of epochs. If bigger than 1, the second
             returned value corresponds to the total number of
