@@ -7,6 +7,7 @@ import cv2
 import pandas as pd
 import tensorflow as tf
 import tensorflow_io as tfio
+import tensorflow_hub as hub
 
 
 def load_video_tf(path: str) -> tf.Tensor:
@@ -169,3 +170,52 @@ def get_number_of_steps(samples: int, batch_size: int, epochs: int = 1) -> Tuple
     steps = samples // batch_size
     return steps, steps * epochs
     
+
+def load_model(path_to_model: Union[str, Path]) -> "tf.keras.engine.functional.Functional":
+    r"""Load a model 
+
+    Args:
+        path_to_model (Union[str, Path]): Path to the SavedModel directory.
+
+    Returns:
+        tf.keras.engine.functional.Functional: Model ready to predict.
+    """
+    if isinstance(path_to_model, Path):
+        path_to_model = str(path_to_model)
+
+    keras_layer = hub.KerasLayer(path_to_model)
+
+    inputs = tf.keras.layers.Input(
+        shape=[None, None, None, 3],
+        dtype=tf.float32
+    )
+    inputs = dict(image=inputs)
+    outputs = keras_layer(inputs)
+
+    model = tf.keras.Model(inputs, outputs)
+    model.build([1, 1, 1, 1, 3])
+
+    return model
+
+
+def prepare_to_predict(video: tf.Tensor, resolution: int = 224) -> tf.Tensor:
+    """Adds a dimension to a video (and possibly resizes to the wanted resolution)
+
+    The model expects the videos with 5 dimensions. When a video
+    was loaded with load_video_tf it will have only the 4 dimension
+    expected, which would represent the batch size during training.
+
+    Args:
+        video (tf.Tensor): video as tf.Tensor, maybe loaded with load_video_tf.
+        resolution (int): 
+            If is different from None, resizes the video, to the expected
+            resolution of the model. If set to None, doesn't do anything.
+            Defaults to 224 (expected shape for a2 model).
+
+    Returns:
+        tf.Tensor: video ready to be passed to model.predict(video)
+    """
+    if resolution is not None:
+        video = tf.image.resize(video, [resolution, resolution])
+    
+    return tf.expand_dims(video, 0)
