@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from typing import *
+import base64
 
 import cv2
 import pandas as pd
@@ -219,3 +220,50 @@ def prepare_to_predict(video: tf.Tensor, resolution: int = 224) -> tf.Tensor:
         video = tf.image.resize(video, [resolution, resolution])
     
     return tf.expand_dims(video, 0)
+
+
+def get_top_k(probs, k=5, label_map=tf.constant([""])):
+    """Outputs the top k model labels and probabilities on the given video."""
+    top_predictions = tf.argsort(probs, axis=-1, direction='DESCENDING')[:k]
+    top_labels = tf.gather(label_map, top_predictions, axis=-1)
+    top_labels = [label.decode('utf8') for label in top_labels.numpy()]
+    top_probs = tf.gather(probs, top_predictions, axis=-1).numpy()
+    return tuple(zip(top_labels, top_probs))
+
+
+def predict_top_k(model, video, k=5, label_map=tf.constant([""])):
+    """Outputs the top k model labels and probabilities on the given video.
+    
+    Args:
+        model (_type_): _description_
+        video (_type_): _description_
+        k (int, optional): _description_. Defaults to 5.
+        label_map (_type_, optional): _description_. Defaults to tf.constant([""]).
+
+    Returns:
+        _type_: _description_
+    """
+    outputs = model.predict(video[tf.newaxis])[0]
+    probs = tf.nn.softmax(outputs)
+    return get_top_k(probs, k=k, label_map=label_map)
+
+
+def parse_video_from_bytes(video_encoded: bytes) -> tf.Tensor:
+    """Parses a base64 encoded video to a tf.Tensor.
+
+    Used to read a video sent through a post request
+
+    Args:
+        video_encoded (_type_): base64 video encoded.
+            This would be equivalent to:
+
+            >>> with open(video_path, "rb") as video_file:
+            >>>    text = base64.b64encode(video_file.read())
+            >>>    video_encoded = base64.b64decode(text)
+
+
+    Returns:
+        tf.Tensor: Video as tf.Tensor.
+            Returns the same object that would be obtained from load_video_tf.
+    """
+    return tfio.experimental.ffmpeg.decode_video(base64.b64decode(video_encoded))
