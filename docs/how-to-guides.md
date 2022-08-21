@@ -136,7 +136,7 @@ from functools import partial
 format_features_a2 = partial(format_features, resolution=224, num_classes=9)
 ```
 
-# Fine-Tuning Movinet A2 Base
+## Fine-Tuning Movinet A2 Base
 
 This package has been used tested on google colab and the version dependencies are adapted for the case.
 
@@ -156,4 +156,16 @@ Get the parameters expected for the model. Read the docs for more info on this
 ```python
 import movinet_helper.modelling as model
 cfg = model.ConfigMovinetA2Base()
+```
+
+KEEP ON THIS POINT
+
+## Load the saved model
+
+Once the model has been fine tuned, it can be loaded to return predictions.
+
+
+```python
+from movinet_helper.utils import load_model
+model = load_model("<path_to_model>")
 ```
