@@ -138,7 +138,7 @@ format_features_a2 = partial(format_features, resolution=224, num_classes=9)
 
 # Fine-Tuning Movinet A2 Base
 
-This package has been used tested on google colab and the version dependencies are adapted for the case.
+This package has been used to fine-tune the model on google colab and the version dependencies are adapted for this case.
 
 The `movinet_tutorial.ipynb` uses tensorflow versions
 2.9 and higher, and the correct movinet model versions are defined there, but there may be some error when calling `fit` to train the model. In that case, take a look at this [issue](https://github.com/tensorflow/models/issues/10590)
@@ -151,9 +151,91 @@ First load the pretrained weights of the chosen model
 !tar -xvf movinet_a0_base.tar.gz
 ```
 
-Get the parameters expected for the model. Read the docs for more info on this
+Get the parameters expected for the model. Read the docs for more info on this.
 
 ```python
 import movinet_helper.modelling as model
-cfg = model.ConfigMovinetA2Base()
+cfg = model.ConfigMovinetA2Base(epochs=EPOCHS)
 ```
+
+Where EPOCHS corresponds to the number of epochs sent to `.fit`.
+
+Assuming you have the info of the dataset in a csv of the following form, compute the train and test steps for the model with the following code snipet. Otherwise, just estimate the length of the training and test datasets to be used:
+
+```python
+from movinets_helper.utils import get_number_of_steps
+import pandas as pd
+
+train_dataset_df = pd.read_csv(<your_dir> / "train_dataset_df.csv")
+test_dataset_df = pd.read_csv(<your_dir> / "test_dataset_df.csv")
+
+train_steps, total_train_steps = get_number_of_steps(len(train_dataset_df), batch_size, epochs=config.epochs)
+test_steps, _ = get_number_of_steps(len(test_dataset_df), batch_size, epochs=config.epochs)
+```
+
+To get the hyperparameters, the following function loads all of them (there is no info regarding the number of training total number of training steps, so this parameter must be given by the anyway):
+
+```python
+params = modeling.default_hyperparams(total_train_steps)
+```
+
+Get your model and compile it with the parameters loaded:
+
+```python
+model = modeling.make_model(NUM_CLASSES, config)
+
+model.compile(loss=params["loss_function"], optimizer=params["optimizer"], metrics=params["metrics"])
+```
+
+*There is a bug with the callbacks, which may be obtained from the `default_hyperparams`, but currently they must be loaded separated. These should be tailored to your needs.*
+
+```python
+checkpoint_filepath = str(<your_dir> / "movinet_a2_base_checkpoints")
+model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    filepath=checkpoint_filepath,
+    save_weights_only=True,
+    monitor='val_top_1',
+    mode='max',
+    save_best_only=True
+)
+callbacks = [
+    tf.keras.callbacks.TensorBoard(),
+    model_checkpoint_callback
+]
+```
+
+Call fit on the model and hope for your data to be kind :)
+
+```python
+results = model.fit(
+    ds_train,
+    validation_data=ds_test,
+    epochs=config.epochs,
+    steps_per_epoch=train_steps,
+    validation_steps=test_steps,
+    callbacks=callbacks,
+    validation_freq=1,
+    verbose=1
+)
+model.save(str(<your_dir> / "movinet_base_a0_fine_tuned"))
+```
+
+#### Loading your trained model
+
+Event though the model would be saved as a `SavedModel`, there are some bugs to load the model directly using the api [model.load](https://www.tensorflow.org/api_docs/python/tf/saved_model/load), but the following piece (which can be found in the tutorial) does the job:
+
+```python
+model_path = "<Path_to_your_SavedModel>"
+keras_layer = hub.KerasLayer(model_path)
+inputs = tf.keras.layers.Input(
+  shape=[None, None, None, 3],
+  dtype=tf.float32
+)
+inputs = dict(image=inputs)
+outputs = keras_layer(inputs)
+
+model = tf.keras.Model(inputs, outputs)
+model.build([1, 1, 1, 1, 3])
+```
+
+Your model is ready to be tested!
