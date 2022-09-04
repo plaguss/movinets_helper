@@ -15,10 +15,10 @@ def load_video_tf(path: str) -> tf.Tensor:
     """Loads a video from an mp4 file and returns the decoded tensor.
 
     Args:
-        path (str): _description_
+        path (str): Path to a video.
 
     Returns:
-        tf.Tensor: _description_
+        tf.Tensor: Tensorflow's representation of the video.
     """
     video = tf.io.read_file(path)
     return tfio.experimental.ffmpeg.decode_video(video)
