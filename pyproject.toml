@@ -46,5 +46,5 @@ dev = [
 ]
 
 [tool.flit.metadata.urls]
-Documentation = "https://movinets_helper.readthedocs.io"
+Documentation = "https://plaguss.github.io/movinets_helper/"
 Repository = "https://github.com/plaguss/movinets_helper"

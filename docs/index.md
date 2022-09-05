@@ -5,11 +5,6 @@ If you read through the [movinet_tutorial.ipynb](https://colab.research.google.c
 
 ## Table Of Contents
 
-The documentation follows the best practice for
-project documentation as described by Daniele Procida
-in the [Diátaxis documentation framework](https://diataxis.fr/)
-and consists of four separate parts:
-
 1. [Installation](installation.md)
 
 2. [How-To Guides](how-to-guides.md)
